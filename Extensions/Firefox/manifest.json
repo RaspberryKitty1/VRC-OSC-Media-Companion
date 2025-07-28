@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Media Info Extractor",
+  "version": "1.0",
+  "description": "Extracts YouTube media info and sends it to a local WebSocket server.",
+  "host_permissions": [
+    "*://*.youtube.com/*"
+  ],
+  "icons": {
+    "48": "icon.svg"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.youtube.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [],
+  "action": {
+    "default_icon": "icon.svg",
+    "default_title": "YouTube Media Info Extractor"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "youtube-media-info@example.com",
+      "strict_min_version": "109.0"
+    }
+  }
+}
