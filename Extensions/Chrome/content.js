@@ -1,57 +1,71 @@
-let socket = null;
+let socket;
 let lastPausedSent = false;
+let lastURL = location.href;
 
 function getYouTubeTitle() {
-  const titleElem = document.querySelector("h1.title.style-scope.ytd-video-primary-info-renderer") ||
-                    document.querySelector("h1.ytd-watch-metadata");
-  return titleElem ? titleElem.textContent.trim() : document.title;
+    const titleElem =
+        document.querySelector("h1.title.style-scope.ytd-video-primary-info-renderer") ||
+        document.querySelector("h1.ytd-watch-metadata");
+    return titleElem ? titleElem.textContent.trim() : document.title;
 }
 
-function sendVideoData(video, isPlaying) {
-  const payload = {
-    title: getYouTubeTitle(),
-    duration: video.duration || 0,
-    currentTime: video.currentTime || 0,
-    playing: isPlaying
-  };
-
-  if (socket && socket.readyState === WebSocket.OPEN) {
-    socket.send(JSON.stringify(payload));
-  }
-}
-
-function startTracking() {
-  setInterval(() => {
-    const video = document.querySelector("video");
-    if (!video) return;
-
-    if (!video.paused && !video.ended) {
-      lastPausedSent = false;
-      sendVideoData(video, true);
-    } else if (!lastPausedSent) {
-      sendVideoData(video, false);
-      lastPausedSent = true;
-    }
-  }, 2000);
+function getUploaderName() {
+    const uploaderElem = document.querySelector("ytd-channel-name yt-formatted-string a");
+    return uploaderElem?.textContent.trim() || null;
 }
 
 function connectWebSocket() {
-  socket = new WebSocket("ws://localhost:12345");
+    socket = new WebSocket("ws://localhost:12345");
 
-  socket.addEventListener("open", () => {
-    console.log("[MediaInfo] WebSocket connected.");
-    startTracking();
-  });
+    socket.onopen = () => {
+        console.log("[MediaInfo] WebSocket connected.");
 
-  socket.addEventListener("error", (err) => {
-    console.warn("[MediaInfo] WebSocket error:", err);
-  });
+        setInterval(() => {
+            if (location.href !== lastURL) {
+                lastURL = location.href;
+                lastPausedSent = false;
+                console.log("[MediaInfo] URL changed:", lastURL);
+            }
 
-  socket.addEventListener("close", () => {
-    console.warn("[MediaInfo] WebSocket closed. Retrying in 5 seconds...");
-    setTimeout(connectWebSocket, 5000);
-  });
+            const video = document.querySelector("video");
+            if (!video) return;
+
+            const payload = {
+                title: getYouTubeTitle(),
+                uploader: getUploaderName(),
+                duration: video.duration || 0,
+                currentTime: video.currentTime || 0,
+                playing: !video.paused && !video.ended
+            };
+
+            if (payload.playing) {
+                lastPausedSent = false;
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify(payload));
+                }
+            } else if (!lastPausedSent) {
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify(payload));
+                    lastPausedSent = true;
+                }
+            }
+        }, 2000);
+    };
+
+    socket.onerror = (err) => {
+        console.warn("[MediaInfo] WebSocket error:", err);
+    };
+
+    socket.onclose = () => {
+        console.log("[MediaInfo] WebSocket closed. Reconnecting in 5s...");
+        setTimeout(connectWebSocket, 5000);
+    };
 }
 
-// Start the connection
+window.addEventListener("beforeunload", () => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.close();
+    }
+});
+
 connectWebSocket();

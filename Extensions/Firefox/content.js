@@ -1,10 +1,17 @@
 let socket;
 let lastPausedSent = false;
+let lastURL = location.href;
 
 function getYouTubeTitle() {
-    const titleElem = document.querySelector("h1.title.style-scope.ytd-video-primary-info-renderer") ||
-                      document.querySelector("h1.ytd-watch-metadata");
+    const titleElem =
+        document.querySelector("h1.title.style-scope.ytd-video-primary-info-renderer") ||
+        document.querySelector("h1.ytd-watch-metadata");
     return titleElem ? titleElem.textContent.trim() : document.title;
+}
+
+function getUploaderName() {
+    const uploaderElem = document.querySelector("ytd-channel-name yt-formatted-string a");
+    return uploaderElem?.textContent.trim() || null;
 }
 
 function connectWebSocket() {
@@ -12,31 +19,32 @@ function connectWebSocket() {
 
     socket.onopen = () => {
         console.log("[MediaInfo] WebSocket connected.");
+
         setInterval(() => {
+            // Detect SPA navigation (YouTube doesn't reload full pages)
+            if (location.href !== lastURL) {
+                lastURL = location.href;
+                lastPausedSent = false;
+                console.log("[MediaInfo] URL changed:", lastURL);
+            }
+
             const video = document.querySelector("video");
             if (!video) return;
 
-            if (!video.paused && !video.ended) {
-                lastPausedSent = false; // Reset pause flag
-                const payload = {
-                    title: getYouTubeTitle(),
-                    duration: video.duration || 0,
-                    currentTime: video.currentTime || 0,
-                    playing: true
-                };
+            const payload = {
+                title: getYouTubeTitle(),
+                uploader: getUploaderName(),
+                duration: video.duration || 0,
+                currentTime: video.currentTime || 0,
+                playing: !video.paused && !video.ended
+            };
 
+            if (payload.playing) {
+                lastPausedSent = false;
                 if (socket.readyState === WebSocket.OPEN) {
                     socket.send(JSON.stringify(payload));
                 }
             } else if (!lastPausedSent) {
-                // Send one-time paused message
-                const payload = {
-                    title: getYouTubeTitle(),
-                    duration: video.duration || 0,
-                    currentTime: video.currentTime || 0,
-                    playing: false
-                };
-
                 if (socket.readyState === WebSocket.OPEN) {
                     socket.send(JSON.stringify(payload));
                     lastPausedSent = true;
@@ -54,5 +62,11 @@ function connectWebSocket() {
         setTimeout(connectWebSocket, 5000);
     };
 }
+
+window.addEventListener("beforeunload", () => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.close();
+    }
+});
 
 connectWebSocket();
