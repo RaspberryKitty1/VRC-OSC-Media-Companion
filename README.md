@@ -23,6 +23,11 @@ This extension allows your currently playing YouTube video to be displayed in VR
 * Total duration
 * Video Uploader
 
+> [!NOTE]
+>
+> The total duration may be inaccurate for livestreams.  
+> I attempted to detect livestreams but it wasn’t working reliably, so I left it as-is.
+
 ✅ Sends a one-time update when the video is paused or stopped
 
 ✅ Automatically reconnects if the WebSocket server restarts
@@ -99,4 +104,5 @@ If you don’t see YouTube info in VRChat:
 ## 📜 License
 
 Licensed under the [MIT License](LICENSE).
+
 
