@@ -21,6 +21,7 @@ This extension allows your currently playing YouTube video to be displayed in VR
 * Video title
 * Current playback time
 * Total duration
+* Video Uploader
 
 ✅ Sends a one-time update when the video is paused or stopped
 
@@ -98,3 +99,4 @@ If you don’t see YouTube info in VRChat:
 ## 📜 License
 
 Licensed under the [MIT License](LICENSE).
+
