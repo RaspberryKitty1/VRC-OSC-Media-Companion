@@ -1,4 +1,4 @@
-let socket;
+let socket = null;
 let lastPausedSent = false;
 
 function getYouTubeTitle() {
@@ -7,55 +7,51 @@ function getYouTubeTitle() {
   return titleElem ? titleElem.textContent.trim() : document.title;
 }
 
+function sendVideoData(video, isPlaying) {
+  const payload = {
+    title: getYouTubeTitle(),
+    duration: video.duration || 0,
+    currentTime: video.currentTime || 0,
+    playing: isPlaying
+  };
+
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify(payload));
+  }
+}
+
+function startTracking() {
+  setInterval(() => {
+    const video = document.querySelector("video");
+    if (!video) return;
+
+    if (!video.paused && !video.ended) {
+      lastPausedSent = false;
+      sendVideoData(video, true);
+    } else if (!lastPausedSent) {
+      sendVideoData(video, false);
+      lastPausedSent = true;
+    }
+  }, 2000);
+}
+
 function connectWebSocket() {
   socket = new WebSocket("ws://localhost:12345");
 
-  socket.onopen = () => {
+  socket.addEventListener("open", () => {
     console.log("[MediaInfo] WebSocket connected.");
-    setInterval(() => {
-      const video = document.querySelector("video");
-      if (!video) return;
+    startTracking();
+  });
 
-      const isLive = !!document.querySelector('.ytp-live-badge');
-
-      if (!video.paused && !video.ended) {
-        lastPausedSent = false;
-        const payload = {
-          title: getYouTubeTitle(),
-          duration: isLive ? -1 : video.duration || 0,
-          currentTime: video.currentTime || 0,
-          isLive: isLive,
-          playing: true
-        };
-
-        if (socket.readyState === WebSocket.OPEN) {
-          socket.send(JSON.stringify(payload));
-        }
-      } else if (!lastPausedSent) {
-        const payload = {
-          title: getYouTubeTitle(),
-          duration: isLive ? -1 : video.duration || 0,
-          currentTime: video.currentTime || 0,
-          isLive: isLive,
-          playing: false
-        };
-
-        if (socket.readyState === WebSocket.OPEN) {
-          socket.send(JSON.stringify(payload));
-          lastPausedSent = true;
-        }
-      }
-    }, 2000);
-  };
-
-  socket.onerror = (err) => {
+  socket.addEventListener("error", (err) => {
     console.warn("[MediaInfo] WebSocket error:", err);
-  };
+  });
 
-  socket.onclose = () => {
-    console.log("[MediaInfo] WebSocket closed. Reconnecting in 5s...");
+  socket.addEventListener("close", () => {
+    console.warn("[MediaInfo] WebSocket closed. Retrying in 5 seconds...");
     setTimeout(connectWebSocket, 5000);
-  };
+  });
 }
 
+// Start the connection
 connectWebSocket();

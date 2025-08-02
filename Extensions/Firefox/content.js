@@ -16,16 +16,12 @@ function connectWebSocket() {
             const video = document.querySelector("video");
             if (!video) return;
 
-            // Detect if video is live using YouTube's live badge element
-            const isLive = !!document.querySelector('.ytp-live-badge');
-
             if (!video.paused && !video.ended) {
                 lastPausedSent = false; // Reset pause flag
                 const payload = {
                     title: getYouTubeTitle(),
-                    duration: isLive ? -1 : video.duration || 0,
+                    duration: video.duration || 0,
                     currentTime: video.currentTime || 0,
-                    isLive: isLive,
                     playing: true
                 };
 
@@ -36,9 +32,8 @@ function connectWebSocket() {
                 // Send one-time paused message
                 const payload = {
                     title: getYouTubeTitle(),
-                    duration: isLive ? -1 : video.duration || 0,
+                    duration: video.duration || 0,
                     currentTime: video.currentTime || 0,
-                    isLive: isLive,
                     playing: false
                 };
 
