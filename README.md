@@ -94,8 +94,8 @@ ws://localhost:12345
 
 2. Click the raw links below to install the appropriate script:
 
-   * [YouTube userscript](https://raw.githubusercontent.com/RaspberryKitty1/Youtube-Copy-Clean-Url/main/User-Scripts/youtube.user.js)
-   * [Twitch userscript](https://raw.githubusercontent.com/RaspberryKitty1/Youtube-Copy-Clean-Url/main/User-Scripts/Twitch.user.js)
+   * [YouTube userscript](https://raw.githubusercontent.com/RaspberryKitty1/VRC-OSC-Media-Companion/main/User-Scripts/youtube.user.js)
+   * [Twitch userscript](https://raw.githubusercontent.com/RaspberryKitty1/VRC-OSC-Media-Companion/main/User-Scripts/twitch.user.js)
 
 3. ✅ Userscripts will inject the playback info sender on supported sites without needing a full extension install.
 
@@ -144,3 +144,5 @@ If playback info doesn’t appear or shows incorrect uploader info:
 ## 📜 License
 
 Licensed under the [MIT License](LICENSE).
+
+
