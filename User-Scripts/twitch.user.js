@@ -10,6 +10,7 @@
 // @updateURL    https://raw.githubusercontent.com/RaspberryKitty1/VRC-OSC-Media-Companion/main/User-Scripts/twitch.user.js
 // @downloadURL  https://raw.githubusercontent.com/RaspberryKitty1/VRC-OSC-Media-Companion/main/User-Scripts/twitch.user.js
 // @icon         https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png
+// @license     MIT
 // ==/UserScript==
 
 (function () {
@@ -122,3 +123,4 @@
 
     connectWebSocket();
 })();
+
