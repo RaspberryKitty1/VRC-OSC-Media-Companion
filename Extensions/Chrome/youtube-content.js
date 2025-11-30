@@ -26,43 +26,43 @@ function waitForElement(selectors, timeout = 3000) {
 }
 
 async function getYouTubeInfo() {
+  if (location.pathname !== "/watch") {
+    return {
+      title: null,
+      uploader: null,
+      duration: 0,
+      currentTime: 0,
+      playing: false,
+      live: false,
+    };
+  }
+
   const info = {};
+  const titleEl = await waitForElement([
+    "h1.title yt-formatted-string",
+    "h1.title.style-scope.ytd-video-primary-info-renderer",
+  ]);
+  info.title = titleEl ? titleEl.textContent.trim() : null;
 
   const channelEl = await waitForElement([
-    '#text-container > yt-formatted-string',
-    '#channel-name yt-formatted-string',
-    'ytd-channel-name a',
-    '#channel-name a',
-    'ytd-video-owner-renderer #text a'
+    "#owner #channel-name a",
+    "ytd-video-owner-renderer #text a",
   ]);
   info.uploader = channelEl ? channelEl.textContent.trim() : null;
 
-  const titleEl = await waitForElement([
-    'h1.title yt-formatted-string',
-    'h1.title.style-scope.ytd-video-primary-info-renderer'
-  ]);
-  info.title = titleEl ? titleEl.textContent.trim() : document.title;
-
-  const video = document.querySelector('video');
+  const video = document.querySelector("video");
   info.currentTime = video ? video.currentTime : 0;
 
-  // Detect live status by checking multiple indicators
-  const viewCountEl = document.querySelector('#info-container #view-count');
-  const ariaLabel = viewCountEl ? viewCountEl.getAttribute('aria-label') : '';
-  const isLiveWatchingNow = ariaLabel && ariaLabel.toLowerCase().includes('watching now');
+  const liveBadge = document.querySelector("yt-live-badge-renderer");
 
-  const liveBadge = document.querySelector('yt-live-badge-renderer, .yt-live-badge-renderer');
-  const infoStrings = document.querySelector('#info-strings');
-  const liveNowText = infoStrings ? infoStrings.textContent.toLowerCase() : '';
-  const hasLiveNowText = liveNowText.includes('live now');
+  const viewCountEl = document.querySelector("#info-container #view-count");
+  const aria = viewCountEl ? viewCountEl.getAttribute("aria-label") : "";
+  const watchingNow = aria && aria.toLowerCase().includes("watching now");
 
-  info.live = !!(isLiveWatchingNow || liveBadge || hasLiveNowText);
+  info.live = !!(liveBadge || watchingNow);
 
-  // Total duration only if NOT live
-  info.duration = info.live ? null : (video ? video.duration : 0);
-
-  // Playing state: video not paused or ended
-  info.playing = video ? (!video.paused && !video.ended) : false;
+  info.duration = info.live ? null : video ? video.duration : 0;
+  info.playing = video ? !video.paused && !video.ended : false;
 
   return info;
 }
@@ -71,18 +71,27 @@ function connectWebSocket() {
   socket = new WebSocket("ws://localhost:12345");
 
   socket.onopen = () => {
-    console.log("[MediaInfo] WebSocket connected.");
+    console.log(
+      "%c[MediaInfo]%c WebSocket connected.",
+      "color: blue; font-weight: bold;",
+      ""
+    );
 
     setInterval(async () => {
-      // SPA navigation detection
       if (location.href !== lastURL) {
         lastURL = location.href;
         lastPausedSent = false;
-        console.log("[MediaInfo] URL changed:", lastURL);
+        console.log(
+          "%c[MediaInfo]%c URL changed:",
+          "color: blue; font-weight: bold;",
+          "",
+          lastURL
+        );
       }
 
       const info = await getYouTubeInfo();
-      if (!info.title) return;
+
+      if (!info.title || !info.uploader) return;
 
       const payload = {
         title: info.title,
@@ -90,7 +99,7 @@ function connectWebSocket() {
         duration: info.duration || 0,
         currentTime: info.currentTime || 0,
         playing: info.playing,
-        live: info.live
+        live: info.live,
       };
 
       if (payload.playing) {
@@ -108,11 +117,20 @@ function connectWebSocket() {
   };
 
   socket.onerror = (err) => {
-    console.warn("[MediaInfo] WebSocket error:", err);
+    console.warn(
+      "%c[MediaInfo]%c WebSocket error:",
+      "color: blue; font-weight: bold;",
+      "",
+      err
+    );
   };
 
   socket.onclose = () => {
-    console.log("[MediaInfo] WebSocket closed. Reconnecting in 5s...");
+    console.log(
+      "%c[MediaInfo]%c WebSocket closed. Reconnecting in 5s...",
+      "color: blue; font-weight: bold;",
+      ""
+    );
     setTimeout(connectWebSocket, 5000);
   };
 }
