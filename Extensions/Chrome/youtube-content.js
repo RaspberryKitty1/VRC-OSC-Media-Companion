@@ -38,28 +38,33 @@ async function getYouTubeInfo() {
   }
 
   const info = {};
+
   const titleEl = await waitForElement([
+    "h1.style-scope.ytd-watch-metadata yt-formatted-string",
+    "h1.ytd-watch-metadata",
     "h1.title yt-formatted-string",
     "h1.title.style-scope.ytd-video-primary-info-renderer",
   ]);
   info.title = titleEl ? titleEl.textContent.trim() : null;
 
   const channelEl = await waitForElement([
+    "ytd-channel-name#owner yt-formatted-string#text a",
     "#owner #channel-name a",
     "ytd-video-owner-renderer #text a",
+    "ytd-channel-name a",
   ]);
   info.uploader = channelEl ? channelEl.textContent.trim() : null;
 
   const video = document.querySelector("video");
   info.currentTime = video ? video.currentTime : 0;
 
-  const liveBadge = document.querySelector("yt-live-badge-renderer");
-
-  const viewCountEl = document.querySelector("#info-container #view-count");
-  const aria = viewCountEl ? viewCountEl.getAttribute("aria-label") : "";
+  const liveBadge = document.querySelector("yt-live-badge-renderer, .ytp-live-badge");
+  const viewCount = document.querySelector("#info-container #view-count");
+  const aria = viewCount ? viewCount.getAttribute("aria-label") : "";
   const watchingNow = aria && aria.toLowerCase().includes("watching now");
+  const isLiveText = document.querySelector("#info-container")?.textContent?.toLowerCase().includes("streaming");
 
-  info.live = !!(liveBadge || watchingNow);
+  info.live = !!(liveBadge || watchingNow || isLiveText || (video && !Number.isFinite(video.duration)));
 
   info.duration = info.live ? null : video ? video.duration : 0;
   info.playing = video ? !video.paused && !video.ended : false;

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Media Info WebSocket Sender
 // @namespace    https://github.com/RaspberryKitty1/VRC-OSC-Media-Companion
-// @version      1.1.0
+// @version      1.1.1
 // @description  Sends YouTube video or livestream info to localhost WebSocket server
 // @author       raspberryKitty1
 // @match        https://www.youtube.com/*
@@ -59,22 +59,30 @@
     const info = {};
 
     const titleEl = await waitForElement([
+      "h1.style-scope.ytd-watch-metadata yt-formatted-string",
+      "h1.ytd-watch-metadata",
       "h1.title yt-formatted-string",
       "h1.ytd-video-primary-info-renderer",
     ]);
     info.title = titleEl ? titleEl.textContent.trim() : document.title;
 
     const uploaderEl = await waitForElement([
+      "ytd-channel-name#owner yt-formatted-string#text a",
       "#owner #channel-name a",
       "ytd-channel-name a",
+      "#upload-info #channel-name a"
     ]);
     info.uploader = uploaderEl ? uploaderEl.textContent.trim() : null;
 
     const video = document.querySelector("video");
     info.currentTime = video ? video.currentTime : 0;
 
-    const liveBadge = document.querySelector("yt-live-badge-renderer");
-    info.live = !!liveBadge;
+    const liveBadge = document.querySelector(
+      "yt-live-badge-renderer, ytd-badge-supported-renderer.badge.style-scope.ytd-watch-metadata [aria-label*='LIVE'], .ytp-live-badge, #info-container yt-formatted-string[id='info']"
+    );
+    const isLiveText = document.querySelector("#info-container")?.textContent?.toLowerCase().includes("streaming");
+    
+    info.live = !!liveBadge || isLiveText || (video && !Number.isFinite(video.duration));
 
     info.duration = info.live ? null : video ? video.duration : 0;
     info.playing = video ? !video.paused && !video.ended : false;
