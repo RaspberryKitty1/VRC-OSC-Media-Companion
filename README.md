@@ -1,6 +1,6 @@
-# 🧩 YouTube + Twitch Playback to VRChat
+# 🧩 Vrchat Compainion Scripts
 
-This project provides browser extensions and userscripts that send **real-time YouTube and Twitch playback info** (title, current time, duration, or stream uptime) to a local WebSocket server. This enables your live media info to appear in **VRChat** via OSC, enhancing your VRChat chatbox with dynamic media overlays.
+This project provides userscripts that send **real-time YouTube and Twitch playback info** (title, current time, duration, or stream uptime) to a local WebSocket server. This enables your live media info to appear in **VRChat** via OSC, enhancing your VRChat chatbox with dynamic media overlays.
 
 🎯 Compatible with [VRChat Spotify + System Stats Chatbox Integration](https://github.com/raspberryKitty1/VRC_Chatbox_OSC).
 
@@ -30,35 +30,30 @@ Display your currently playing **YouTube video** or **Twitch stream** playback i
 
 **For Twitch:**
 
-* Stream title  
-* Channel name  
-* Uptime since stream started  
+* Stream title
+* Channel name
+* Uptime since stream started
 * Live status (always `true` if live)
 
 ✅ Twitch uptime parsed from native Twitch stream timer (accurate to seconds)
 
 ✅ Automatically reconnects if the WebSocket server restarts
 
-✅ Compatible with **Firefox** and **Chromium-based browsers** using Manifest V3
-
-✅ Userscripts versions available for quick, lightweight install via Tampermonkey or similar
+✅ Available as lightweight userscripts via Tampermonkey or similar managers
 
 ---
 
 ## 🌐 Requirements
 
 * **Browser**:
-
-  * ✅ Firefox (Manifest V3)  
-  * ✅ Chromium-based (Chrome, Edge, Brave, Opera)  
-  * ✅ Any browser supporting userscripts managers like Tampermonkey
+* ✅ Any browser supporting userscript managers like Tampermonkey (Chrome, Firefox, Edge, Brave, Opera, etc.)
 
 * **VRChat Tray App** with WebSocket listener enabled
-
 * **Local WebSocket server** listening on:
 
 ```bash
 ws://localhost:12345
+
 ```
 
 > ℹ️ The VRChat tray app receives this data and pushes it into VRChat chatbox via OSC.
@@ -67,37 +62,15 @@ ws://localhost:12345
 
 ## 📥 Installation Guide
 
-### 🔥 Browser Extensions (Recommended for best performance)
+### 🖥️ Userscripts
 
-1. Visit the [Releases Page](https://github.com/RaspberryKitty1/Youtube-Copy-Clean-Url/releases).
-
-2. **For Firefox**:
-
-   * Download the `.xpi` file
-   * Open it and click **“Add”** when prompted
-
-3. **For Chromium browsers**:
-
-   * Go to `chrome://extensions/`
-   * Enable **Developer Mode**
-   * Download the ZIP release
-   * Extract to a permanent folder
-   * Click **“Load unpacked”** and select the folder
-
-4. ✅ Done! The extension will auto-detect and send YouTube or Twitch playback data.
-
----
-
-### 🖥️ Userscripts (Lightweight, easy install)
-
-1. Install a userscript manager extension such as [Tampermonkey](https://www.tampermonkey.net/).
-
+1. Install a userscript manager such as [Tampermonkey](https://www.tampermonkey.net/).
 2. Click the raw links below to install the appropriate script:
 
-   * [YouTube userscript](https://raw.githubusercontent.com/RaspberryKitty1/VRC-OSC-Media-Companion/main/User-Scripts/youtube.user.js)
-   * [Twitch userscript](https://raw.githubusercontent.com/RaspberryKitty1/VRC-OSC-Media-Companion/main/User-Scripts/twitch.user.js)
+* [YouTube userscript](https://raw.githubusercontent.com/RaspberryKitty1/VRC-OSC-Media-Companion/main/User-Scripts/youtube.user.js)
+* [Twitch userscript](https://raw.githubusercontent.com/RaspberryKitty1/VRC-OSC-Media-Companion/main/User-Scripts/twitch.user.js)
 
-3. ✅ Userscripts will inject the playback info sender on supported sites without needing a full extension install.
+1. ✅ Done! The userscripts will auto-detect and send YouTube or Twitch playback data on supported sites.
 
 ---
 
@@ -115,7 +88,7 @@ ws://localhost:12345
 If playback info doesn’t appear or shows incorrect uploader info:
 
 * Ensure the video or stream is actively playing and the browser tab is focused/active.
-* Reload or refresh the YouTube/Twitch tab to reset content script data.
+* Reload or refresh the YouTube/Twitch tab to reset userscript data.
 * Sometimes the uploader or streamer name may not load correctly on first connection; reloading the page usually fixes this.
 * Verify the **VRChat Tray App** is running.
 * Confirm the Tray App mode is set to `media` or `full` depending on your usage.
@@ -126,17 +99,11 @@ If playback info doesn’t appear or shows incorrect uploader info:
 
 ## 🧪 Development Notes
 
-* Uses **Manifest V3** for browser extensions
-
-* Content scripts are isolated per platform:
-
-  * `youtube-content.js` for YouTube
-  * `twitch-content.js` for Twitch
+* Scripts are isolated per platform:
+* `youtube.user.js` for YouTube
+* `twitch.user.js` for Twitch
 
 * Sends JSON data to the local WebSocket server
-
-* Userscripts are full-featured but lighter alternatives
-
 * Open source — issues and PRs welcome!
 
 ---
@@ -144,5 +111,3 @@ If playback info doesn’t appear or shows incorrect uploader info:
 ## 📜 License
 
 Licensed under the [MIT License](LICENSE).
-
-
