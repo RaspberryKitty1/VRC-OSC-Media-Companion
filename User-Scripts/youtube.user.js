@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Media Info WebSocket Sender
 // @namespace    https://github.com/RaspberryKitty1/VRC-OSC-Media-Companion
-// @version      1.1.1
+// @version      1.1.3
 // @description  Sends YouTube video or livestream info to localhost WebSocket server
 // @author       raspberryKitty1
 // @match        https://www.youtube.com/*
